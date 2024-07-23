@@ -25,4 +25,20 @@ router.get('/:id', authenticate, authorize(['pengguna']), async (req, res) => {
   res.send(doctorSnapshot.data());
 });
 
+router.post('/', authenticate, authorize(['dokter']), async (req, res) => {
+  const { id, name, category, location, specialization, rating } = req.body;
+
+  if (!id || !name || !category || !location || !specialization || rating === undefined) {
+    return res.status(400).send({ message: 'All fields are required' });
+  }
+
+  try {
+    const newDoctor = { id, name, category, location, specialization, rating };
+    await db.collection('doctors').doc(id).set(newDoctor);
+    res.status(201).send({ message: 'Doctor created successfully', doctor: newDoctor });
+  } catch (error) {
+    res.status(500).send({ message: 'Error creating doctor', error: error.message });
+  }
+});
+
 module.exports = router;
